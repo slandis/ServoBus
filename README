@@ -1,0 +1,9 @@
+Serial Bus Servo Control Arduino Library
+
+This library allows for control and maintenance of serial bus servos, specifically the LX-16A from LOBOT/LewanSoul.
+
+The library sends and receives commands via a 115200B serial connection. In practice this needs to be a hardware serial connect, as software serial introduces a more than acceptable amount of error at this speed. Status replies from the bus are received asynchronously and utilize callbacks to hand off pertinent data.
+
+It is recommended to use this library in conjunction with a board which contains more than one hardware serial port. While the manufacturer states that these servos are protocol-compatible with Dynamixel servos this does not bear out with a simple reading of the data sheets.
+
+There is currently no documentation on specific functions but they are fairly self explanatory.
