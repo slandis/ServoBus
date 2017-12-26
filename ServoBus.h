@@ -2,7 +2,7 @@
  * ServoBus/ServoBus.h
  * Copyright (C) 2017 Shaun Landis
  * <slandis@github>
- * 
+ *
  */
 
 #include <Arduino.h>
@@ -63,10 +63,13 @@
 #define REPLY_LEDCONTROL           11
 #define REPLY_LEDERROR             12
 
+#define TX_DELAY                  400
+#define RX_DELAY                   10
+
 #define BYTE_TO_HW(A, B) ((((uint16_t)(A)) << 8) | (uint8_t)(B))
 
 class ServoBus {
-  
+
 public:
   ServoBus(Stream *stream, int writePin);
   void MoveTime(uint8_t id, int16_t position, uint16_t span);
@@ -106,7 +109,7 @@ private:
   Stream *_serial;
   int _writePin;
   byte input_buffer[SERVO_MAX_MSG];
- 
+
   uint8_t _checksum(byte buffer[]);
   void _write(uint8_t buffer[], int len);
   int _read();
@@ -114,4 +117,3 @@ private:
 
   ServoEvent *servoEvents[13];
 };
-

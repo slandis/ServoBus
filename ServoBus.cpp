@@ -2,9 +2,9 @@
  * ServoBus/ServoBus.cpp
  * Copyright (C) 2017 Shaun Landis
  * <slandis@github>
- * 
+ *
  */
- 
+
 #include "ServoBus.h"
 
 ServoBus::ServoBus(Stream *serial, int writePin) {
@@ -28,19 +28,21 @@ uint8_t ServoBus::_checksum(uint8_t buffer[]) {
 
 void ServoBus::_write(uint8_t buffer[], int len) {
   digitalWrite(_writePin, HIGH);
-  
+
   _serial->write(buffer, len);
   _serial->flush();
+
+  delayMicroseconds(TX_DELAY);
 }
 
 int ServoBus::_read() {
   uint8_t frame = 0;
   int len = 0;
-  
+
   digitalWrite(_writePin, LOW);
   memset(input_buffer, 0, 10);
 
-  delay(30);
+  delay(RX_DELAY);
 
   if (_serial->available() > 0) {
     if (_serial->peek() == 0x55 && input_buffer[0] != 0x55)
@@ -50,7 +52,7 @@ int ServoBus::_read() {
       input_buffer[len++] = _serial->read();
       input_buffer[len++] = _serial->read();
       input_buffer[len++] = _serial->read();
-      
+
       while (_serial->available()  > 0 && len < SERVO_MAX_MSG) {
         input_buffer[len++] = _serial->read();
       }
@@ -66,9 +68,9 @@ int ServoBus::_read() {
 
 void ServoBus::_clear() {
   digitalWrite(_writePin, LOW);
-  
+
   while (_serial->read() != -1);
-  
+
   digitalWrite(_writePin, HIGH);
 }
 
@@ -396,7 +398,7 @@ void ServoBus::requestMoveTime(byte id) {
 
   if (servoEvents[REPLY_MOVETIME]) {
     if (_read() == 10) {
-      if (_checksum(input_buffer) == input_buffer[9]) {      
+      if (_checksum(input_buffer) == input_buffer[9]) {
         servoEvents[REPLY_MOVETIME](input_buffer[2], REPLY_MOVETIME, (uint16_t)BYTE_TO_HW(input_buffer[6], input_buffer[5]), (uint16_t)BYTE_TO_HW(input_buffer[8], input_buffer[7]));
       }
     }
@@ -498,7 +500,7 @@ void ServoBus::requestTempMaxLimit(uint8_t id) {
 
   _clear();
   _write(buf, 6);
-  
+
   if(_read() == 5)
     return input_buffer[3];
 
@@ -655,5 +657,3 @@ void ServoBus::requestLEDError(uint8_t id) {
 void ServoBus::setEventHandler(int EventType, ServoEvent servoEvent) {
   servoEvents[EventType] = servoEvent;
 }
-
-
