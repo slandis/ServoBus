@@ -10,6 +10,9 @@
 ServoBus::ServoBus(Stream *serial, int writePin) {
   _serial = serial;
   _writePin = writePin;
+
+  pinMode(_writePin, OUTPUT);
+  digitalWrite(_writePin, HIGH);
 }
 
 uint8_t ServoBus::_checksum(uint8_t buffer[]) {
@@ -30,13 +33,11 @@ void ServoBus::_write(uint8_t buffer[], int len) {
   digitalWrite(_writePin, HIGH);
 
   _serial->write(buffer, len);
-  _serial->flush();
 
   delayMicroseconds(TX_DELAY);
 }
 
 int ServoBus::_read() {
-  uint8_t frame = 0;
   int len = 0;
 
   digitalWrite(_writePin, LOW);
@@ -501,10 +502,13 @@ void ServoBus::requestTempMaxLimit(uint8_t id) {
   _clear();
   _write(buf, 6);
 
-  if(_read() == 5)
-    return input_buffer[3];
-
-  return -1;
+  if (servoEvents[REPLY_TEMPMAXLIMIT]) {
+    if(_read() == 5) {
+      if (_checksum(input_buffer) == input_buffer[6]) {
+        servoEvents[REPLY_TEMPMAXLIMIT](input_buffer[2], REPLY_TEMPMAXLIMIT, (uint16_t)input_buffer[5], 0);
+      }
+    }
+  }
 }
 
 void ServoBus::requestTemp(uint8_t id) {
